@@ -285,6 +285,11 @@ static int __ffs_ep0_queue_wait(struct ffs_data *ffs, char *data, size_t len)
 	struct usb_request *req = ffs->ep0req;
 	int ret;
 
+	if (!req) {
+		spin_unlock_irq(&ffs->ev.waitq.lock);
+		return -EINVAL;
+	}
+
 	req->zero     = len < le16_to_cpu(ffs->ev.setup.wLength);
 
 	spin_unlock_irq(&ffs->ev.waitq.lock);
@@ -1328,10 +1333,13 @@ ffs_epfile_release(struct inode *inode, struct file *file)
 {
 	struct ffs_epfile *epfile = inode->i_private;
 	struct ffs_data *ffs = epfile->ffs;
+	unsigned long flags;
 
 	ENTER();
 
+	spin_lock_irqsave(&epfile->ffs->eps_lock, flags);
 	__ffs_epfile_read_buffer_free(epfile);
+	spin_unlock_irqrestore(&epfile->ffs->eps_lock, flags);
 	ffs_log("%s: state %d setup_state %d flag %lu opened %u",
 		epfile->name, epfile->ffs->state, epfile->ffs->setup_state,
 		epfile->ffs->flags, atomic_read(&epfile->opened));
@@ -1836,6 +1844,7 @@ static void ffs_data_closed(struct ffs_data *ffs)
 			spin_unlock_irqrestore(&ffs->eps_lock,
 							flags);
 
+            mutex_lock(&ffs->mutex);
 			if (epfiles)
 				ffs_epfiles_destroy(epfiles,
 						 ffs->eps_count);
@@ -1924,6 +1933,7 @@ static void ffs_data_clear(struct ffs_data *ffs)
 	 * & ffs_epfile_release therefore maintaining a local
 	 * copy of epfile will save us from use-after-free.
 	 */
+    mutex_lock(&ffs->mutex);
 	if (epfiles) {
 		ffs_epfiles_destroy(epfiles, ffs->eps_count);
 		ffs->epfiles = NULL;
@@ -1935,8 +1945,12 @@ static void ffs_data_clear(struct ffs_data *ffs)
 	}
 
 	kfree(ffs->raw_descs_data);
+	ffs->raw_descs_data = NULL;
 	kfree(ffs->raw_strings);
+	ffs->raw_strings = NULL;
 	kfree(ffs->stringtabs);
+	ffs->stringtabs = NULL;
+	mutex_unlock(&ffs->mutex);
 }
 
 static void ffs_data_reset(struct ffs_data *ffs)
@@ -1948,10 +1962,7 @@ static void ffs_data_reset(struct ffs_data *ffs)
 
 	ffs_data_clear(ffs);
 
-	ffs->raw_descs_data = NULL;
 	ffs->raw_descs = NULL;
-	ffs->raw_strings = NULL;
-	ffs->stringtabs = NULL;
 
 	ffs->raw_descs_length = 0;
 	ffs->fs_descs_count = 0;
@@ -2019,12 +2030,14 @@ static void functionfs_unbind(struct ffs_data *ffs)
 	ENTER();
 
 	if (!WARN_ON(!ffs->gadget)) {
+		/* dequeue before freeing ep0req */
+		usb_ep_dequeue(ffs->gadget->ep0, ffs->ep0req);
+		mutex_lock(&ffs->mutex);
 		usb_ep_free_request(ffs->gadget->ep0, ffs->ep0req);
 		ffs->ep0req = NULL;
 		ffs->gadget = NULL;
 		clear_bit(FFS_FL_BOUND, &ffs->flags);
-		ffs_log("state %d setup_state %d flag %lu gadget %pK\n",
-			ffs->state, ffs->setup_state, ffs->flags, ffs->gadget);
+		mutex_unlock(&ffs->mutex);
 		ffs_data_put(ffs);
 	}
 }
@@ -2092,7 +2105,7 @@ static void ffs_epfiles_destroy(struct ffs_epfile *epfiles, unsigned count)
 static void ffs_func_eps_disable(struct ffs_function *func)
 {
 	struct ffs_ep *ep;
-	struct ffs_data *ffs;
+	struct ffs_data *ffs      = func->ffs;
 	struct ffs_epfile *epfile;
 	unsigned short count;
 	unsigned long flags;
@@ -2102,7 +2115,6 @@ static void ffs_func_eps_disable(struct ffs_function *func)
 
 	spin_lock_irqsave(&func->ffs->eps_lock, flags);
 	ep = func->eps;
-	ffs = func->ffs;
 	epfile = func->ffs->epfiles;
 	count = func->ffs->eps_count;
 	while (count--) {
@@ -3603,7 +3615,7 @@ static int ffs_func_setup(struct usb_function *f,
 	__ffs_event_add(ffs, FUNCTIONFS_SETUP);
 	spin_unlock_irqrestore(&ffs->ev.waitq.lock, flags);
 
-	return creq->wLength == 0 ? USB_GADGET_DELAYED_STATUS : 0;
+	return ffs->ev.setup.wLength == 0 ? USB_GADGET_DELAYED_STATUS : 0;
 }
 
 static bool ffs_func_req_match(struct usb_function *f,
@@ -3825,8 +3837,8 @@ static void ffs_func_unbind(struct usb_configuration *c,
 	/* Drain any pending AIO completions */
 	drain_workqueue(ffs->io_completion_wq);
 
+	ffs_event_add(ffs, FUNCTIONFS_UNBIND);
 	if (!--opts->refcnt) {
-		ffs_event_add(ffs, FUNCTIONFS_UNBIND);
 		functionfs_unbind(ffs);
 	}
 
@@ -3851,13 +3863,6 @@ static void ffs_func_unbind(struct usb_configuration *c,
 	func->function.ss_descriptors = NULL;
 	func->function.ssp_descriptors = NULL;
 	func->interfaces_nums = NULL;
-
-	if (opts->refcnt) {
-		ffs_event_add(ffs, FUNCTIONFS_UNBIND);
-
-		ffs_log("exit: state %d setup_state %d flag %lu", ffs->state,
-			ffs->setup_state, ffs->flags);
-	}
 }
 
 static struct usb_function *ffs_alloc(struct usb_function_instance *fi)
