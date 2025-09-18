@@ -2864,6 +2864,7 @@ static int mdss_dsi_panel_timing_from_dt(struct device_node *np,
 {
 	u32 tmp;
 	u64 tmp64;
+	u32 hacking_weight = 1200;
 	int rc, i, len;
 	const char *data;
 	struct mdss_dsi_ctrl_pdata *ctrl_pdata;
@@ -2884,6 +2885,10 @@ static int mdss_dsi_panel_timing_from_dt(struct device_node *np,
 	pt->timing.xres = tmp;
 	pr_err("%s:%d, [endcredits], panel width is tmp=%d, pt->timing.xres=%d \n",
 						__func__, __LINE__, tmp, pt->timing.xres);
+	
+	pr_err("%s:%d, [endcredits], hacking to modify the display weight to %d \n",
+						__func__, __LINE__, hacking_weight);
+	pt->timing.xres = hacking_weight;
 
 	rc = of_property_read_u32(np, "qcom,mdss-dsi-panel-height", &tmp);
 	if (rc) {

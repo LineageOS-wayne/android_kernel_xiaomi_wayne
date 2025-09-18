@@ -424,6 +424,7 @@ static int dsi_panel_parse_timing(struct dsi_mode_info *mode,
 				  struct device_node *of_node)
 {
 	int rc = 0;
+	u32 hacking_weight = 1200;
 
 	rc = of_property_read_u32(of_node, "qcom,mdss-dsi-panel-framerate",
 				  &mode->refresh_rate);
@@ -439,6 +440,12 @@ static int dsi_panel_parse_timing(struct dsi_mode_info *mode,
 		pr_err("failed to read qcom,mdss-dsi-panel-width, rc=%d\n", rc);
 		goto error;
 	}
+
+	pr_err("%s: [endcredits]: parsed display weight is mode->h_active=%d",
+		__func__, mode->h_active)
+	pr_err("%s: [endcredits]: hacking to modify the display weight to 1920",
+		__func__)
+	mode->h_active = hacking_weight;
 
 	rc = of_property_read_u32(of_node, "qcom,mdss-dsi-h-front-porch",
 				  &mode->h_front_porch);
