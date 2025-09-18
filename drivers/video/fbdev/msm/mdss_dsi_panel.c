@@ -2882,6 +2882,8 @@ static int mdss_dsi_panel_timing_from_dt(struct device_node *np,
 		return -EINVAL;
 	}
 	pt->timing.xres = tmp;
+	pr_err("%s:%d, [endcredits], panel width is tmp=%d, pt->timing.xres=%d \n",
+						__func__, __LINE__, tmp, pt->timing.xres);
 
 	rc = of_property_read_u32(np, "qcom,mdss-dsi-panel-height", &tmp);
 	if (rc) {
@@ -2890,6 +2892,8 @@ static int mdss_dsi_panel_timing_from_dt(struct device_node *np,
 		return -EINVAL;
 	}
 	pt->timing.yres = tmp;
+	pr_err("%s:%d, [endcredits], panel height is tmp=%d, pt->timing.yres=%d \n",
+						__func__, __LINE__, tmp, pt->timing.yres);
 
 	rc = of_property_read_u32(np, "qcom,mdss-dsi-h-front-porch", &tmp);
 	pt->timing.h_front_porch = (!rc ? tmp : 6);
