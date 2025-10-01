@@ -1227,7 +1227,7 @@ static int mdss_dsi_panel_on(struct mdss_panel_data *pdata)
 				ctrl->ndx, on_cmds->cmd_cnt);
 
 	if (on_cmds->cmd_cnt)
-		mdss_dsi_panel_cmds_send(ctrl, on_cmds, CMD_REQ_COMMIT);
+	mdss_dsi_panel_cmds_send(ctrl, on_cmds, CMD_REQ_COMMIT);
 
 #ifdef CONFIG_MACH_MI
 	if (pinfo->panel_dead && pinfo->initial_esd_check.check_cmd
@@ -2949,38 +2949,42 @@ static int mdss_dsi_panel_timing_from_dt(struct device_node *np,
 #else
 
 	pr_err("%s:%d, [endcredits], CONFIG_FB_MSM_HACK_DISPALY enabled, override properties\n",
-						__func__, __LINE__, tmp, pt->timing.xres);
+						__func__, __LINE__);
 
 	pt->timing.xres = hack_display->panel_width;
+	pr_err("%s:%d, [endcredits], panel xres is pt->timing.xres=%d \n",
+						__func__, __LINE__, pt->timing.xres);
 	pt->timing.yres = hack_display->panel_height;
+	pr_err("%s:%d, [endcredits], panel yres is pt->timing.yres=%d \n",
+						__func__, __LINE__, pt->timing.yres);
 
 	pt->timing.h_front_porch = hack_display->dsi_h_front_porch;
 	pr_err("%s:%d, [endcredits], panel h_front_porch is pt->timing.h_front_porch=%d \n",
-						__func__, __LINE__, tmp, pt->timing.h_front_porch);
+						__func__, __LINE__, pt->timing.h_front_porch);
 
 	pt->timing.h_back_porch = hack_display->dsi_h_back_porch;
 	pr_err("%s:%d, [endcredits], panel h_back_porch is pt->timing.h_back_porch=%d \n",
-						__func__, __LINE__, tmp, pt->timing.h_back_porch);
+						__func__, __LINE__, pt->timing.h_back_porch);
 
 	pt->timing.h_pulse_width = hack_display->dsi_h_pulse_width;
 	pr_err("%s:%d, [endcredits], panel h_pulse_width is pt->timing.h_pulse_width=%d \n",
-						__func__, __LINE__, tmp, pt->timing.h_pulse_width);
+						__func__, __LINE__, pt->timing.h_pulse_width);
 
 	pt->timing.hsync_skew = hack_display->dsi_h_sync_skew;
 	pr_err("%s:%d, [endcredits], panel hsync_skew is pt->timing.hsync_skew=%d \n",
-						__func__, __LINE__, tmp, pt->timing.hsync_skew);
+						__func__, __LINE__, pt->timing.hsync_skew);
 
 	pt->timing.v_back_porch = hack_display->dsi_v_back_porch;
 	pr_err("%s:%d, [endcredits], panel v_back_porch is pt->timing.v_back_porch=%d \n",
-						__func__, __LINE__, tmp, pt->timing.v_back_porch);
+						__func__, __LINE__, pt->timing.v_back_porch);
 
 	pt->timing.v_front_porch = hack_display->dsi_v_front_porch;
 	pr_err("%s:%d, [endcredits], panel v_front_porch is pt->timing.v_front_porch=%d \n",
-						__func__, __LINE__, tmp, pt->timing.v_front_porch);
+						__func__, __LINE__, pt->timing.v_front_porch);
 
 	pt->timing.v_pulse_width = hack_display->dsi_v_pulse_width;
 	pr_err("%s:%d, [endcredits], panel v_pulse_width is pt->timing.v_pulse_width=%d \n",
-						__func__, __LINE__, tmp, pt->timing.v_pulse_width);
+						__func__, __LINE__, pt->timing.v_pulse_width);
 	pr_err("%s:%d, [endcredits], finishing properties overriding",
 						__func__, __LINE__);
 #endif // CONFIG_FB_MSM_HACK_DISPALY
