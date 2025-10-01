@@ -29,6 +29,8 @@
 #include "mdss_debug.h"
 #include "mdss_livedisplay.h"
 
+#include "mdss_hack_display.h"
+
 #define DT_CMD_HDR 6
 #define DEFAULT_MDP_TRANSFER_TIME 14000
 
@@ -2864,18 +2866,33 @@ static int mdss_dsi_panel_timing_from_dt(struct device_node *np,
 {
 	u32 tmp;
 	u64 tmp64;
-	u32 hacking_weight = 1200;
 	int rc, i, len;
 	const char *data;
 	struct mdss_dsi_ctrl_pdata *ctrl_pdata;
 	struct mdss_panel_info *pinfo;
 	bool phy_timings_present = false;
 
+	hack_display_data *hack_display = &(hack_display_data){
+		.panel_frame_rate = 60,
+		.panel_width = 1200,
+		.panel_height = 1920,
+		.dsi_h_back_porch = 10,
+		.dsi_h_front_porch = 10,
+		.dsi_h_pulse_width = 10,
+		.dsi_h_sync_skew = 10,
+		.dsi_v_back_porch = 18,
+		.dsi_v_front_porch = 140,
+		.dsi_v_pulse_width = 10
+	};
+
+	print_hack_display_data(hack_display);
+
 	pinfo = &panel_data->panel_info;
 
 	ctrl_pdata = container_of(panel_data, struct mdss_dsi_ctrl_pdata,
 				panel_data);
 
+#ifndef CONFIG_FB_MSM_HACK_DISPALY
 	rc = of_property_read_u32(np, "qcom,mdss-dsi-panel-width", &tmp);
 	if (rc) {
 		pr_err("%s:%d, panel width not specified\n",
@@ -2885,11 +2902,11 @@ static int mdss_dsi_panel_timing_from_dt(struct device_node *np,
 	pt->timing.xres = tmp;
 	pr_err("%s:%d, [endcredits], panel width is tmp=%d, pt->timing.xres=%d \n",
 						__func__, __LINE__, tmp, pt->timing.xres);
-	
+/*
 	pr_err("%s:%d, [endcredits], hacking to modify the display weight to %d \n",
-						__func__, __LINE__, hacking_weight);
+						__func__, __LINE__, hack_display->panel_width);
 	pt->timing.xres = hacking_weight;
-
+*/
 	rc = of_property_read_u32(np, "qcom,mdss-dsi-panel-height", &tmp);
 	if (rc) {
 		pr_err("%s:%d, panel height not specified\n",
@@ -2902,18 +2919,71 @@ static int mdss_dsi_panel_timing_from_dt(struct device_node *np,
 
 	rc = of_property_read_u32(np, "qcom,mdss-dsi-h-front-porch", &tmp);
 	pt->timing.h_front_porch = (!rc ? tmp : 6);
+	pr_err("%s:%d, [endcredits], panel h_front_porch is pt->timing.h_front_porch=%d \n",
+						__func__, __LINE__, tmp, pt->timing.h_front_porch);
 	rc = of_property_read_u32(np, "qcom,mdss-dsi-h-back-porch", &tmp);
 	pt->timing.h_back_porch = (!rc ? tmp : 6);
+	pr_err("%s:%d, [endcredits], panel h_back_porch is pt->timing.h_back_porch=%d \n",
+						__func__, __LINE__, tmp, pt->timing.h_back_porch);
 	rc = of_property_read_u32(np, "qcom,mdss-dsi-h-pulse-width", &tmp);
 	pt->timing.h_pulse_width = (!rc ? tmp : 2);
+	pr_err("%s:%d, [endcredits], panel h_pulse_width is pt->timing.h_pulse_width=%d \n",
+						__func__, __LINE__, tmp, pt->timing.h_pulse_width);
 	rc = of_property_read_u32(np, "qcom,mdss-dsi-h-sync-skew", &tmp);
 	pt->timing.hsync_skew = (!rc ? tmp : 0);
+	pr_err("%s:%d, [endcredits], panel hsync_skew is pt->timing.hsync_skew=%d \n",
+						__func__, __LINE__, tmp, pt->timing.hsync_skew);
 	rc = of_property_read_u32(np, "qcom,mdss-dsi-v-back-porch", &tmp);
 	pt->timing.v_back_porch = (!rc ? tmp : 6);
+	pr_err("%s:%d, [endcredits], panel v_back_porch is pt->timing.v_back_porch=%d \n",
+						__func__, __LINE__, tmp, pt->timing.v_back_porch);
 	rc = of_property_read_u32(np, "qcom,mdss-dsi-v-front-porch", &tmp);
 	pt->timing.v_front_porch = (!rc ? tmp : 6);
+	pr_err("%s:%d, [endcredits], panel v_front_porch is pt->timing.v_front_porch=%d \n",
+						__func__, __LINE__, tmp, pt->timing.v_front_porch);
 	rc = of_property_read_u32(np, "qcom,mdss-dsi-v-pulse-width", &tmp);
 	pt->timing.v_pulse_width = (!rc ? tmp : 2);
+	pr_err("%s:%d, [endcredits], panel v_pulse_width is pt->timing.v_pulse_width=%d \n",
+						__func__, __LINE__, tmp, pt->timing.v_pulse_width);
+
+#else
+
+	pr_err("%s:%d, [endcredits], CONFIG_FB_MSM_HACK_DISPALY enabled, override properties\n",
+						__func__, __LINE__, tmp, pt->timing.xres);
+
+	pt->timing.xres = hack_display->panel_width;
+	pt->timing.yres = hack_display->panel_height;
+
+	pt->timing.h_front_porch = hack_display->dsi_h_front_porch;
+	pr_err("%s:%d, [endcredits], panel h_front_porch is pt->timing.h_front_porch=%d \n",
+						__func__, __LINE__, tmp, pt->timing.h_front_porch);
+
+	pt->timing.h_back_porch = hack_display->dsi_h_back_porch;
+	pr_err("%s:%d, [endcredits], panel h_back_porch is pt->timing.h_back_porch=%d \n",
+						__func__, __LINE__, tmp, pt->timing.h_back_porch);
+
+	pt->timing.h_pulse_width = hack_display->dsi_h_pulse_width;
+	pr_err("%s:%d, [endcredits], panel h_pulse_width is pt->timing.h_pulse_width=%d \n",
+						__func__, __LINE__, tmp, pt->timing.h_pulse_width);
+
+	pt->timing.hsync_skew = hack_display->dsi_h_sync_skew;
+	pr_err("%s:%d, [endcredits], panel hsync_skew is pt->timing.hsync_skew=%d \n",
+						__func__, __LINE__, tmp, pt->timing.hsync_skew);
+
+	pt->timing.v_back_porch = hack_display->dsi_v_back_porch;
+	pr_err("%s:%d, [endcredits], panel v_back_porch is pt->timing.v_back_porch=%d \n",
+						__func__, __LINE__, tmp, pt->timing.v_back_porch);
+
+	pt->timing.v_front_porch = hack_display->dsi_v_front_porch;
+	pr_err("%s:%d, [endcredits], panel v_front_porch is pt->timing.v_front_porch=%d \n",
+						__func__, __LINE__, tmp, pt->timing.v_front_porch);
+
+	pt->timing.v_pulse_width = hack_display->dsi_v_pulse_width;
+	pr_err("%s:%d, [endcredits], panel v_pulse_width is pt->timing.v_pulse_width=%d \n",
+						__func__, __LINE__, tmp, pt->timing.v_pulse_width);
+	pr_err("%s:%d, [endcredits], finishing properties overriding",
+						__func__, __LINE__);
+#endif // CONFIG_FB_MSM_HACK_DISPALY
 
 	rc = of_property_read_u32(np, "qcom,mdss-dsi-h-left-border", &tmp);
 	pt->timing.border_left = !rc ? tmp : 0;
