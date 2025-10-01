@@ -1201,6 +1201,8 @@ static int mdss_dsi_panel_on(struct mdss_panel_data *pdata)
 	struct dsi_panel_cmds *on_cmds;
 	int ret = 0;
 
+	pr_err("endcredits: mdss_dsi_panel_on enter");
+
 	if (pdata == NULL) {
 		pr_err("%s: Invalid input data\n", __func__);
 		return -EINVAL;
@@ -1214,6 +1216,7 @@ static int mdss_dsi_panel_on(struct mdss_panel_data *pdata)
 
 	if (pinfo->dcs_cmd_by_left) {
 		if (ctrl->ndx != DSI_CTRL_LEFT)
+		pr_err("DSI_CTRL_LEFT to end");
 			goto end;
 	}
 
@@ -1221,14 +1224,16 @@ static int mdss_dsi_panel_on(struct mdss_panel_data *pdata)
 
 	if ((pinfo->mipi.dms_mode == DYNAMIC_MODE_SWITCH_IMMEDIATE) &&
 			(pinfo->mipi.boot_mode != pinfo->mipi.mode))
+		pr_err("%s: endcredits: using post_dms_on_cmds", __func__);
 		on_cmds = &ctrl->post_dms_on_cmds;
 
 	pr_debug("%s: ndx=%d cmd_cnt=%d\n", __func__,
 				ctrl->ndx, on_cmds->cmd_cnt);
 
-	if (on_cmds->cmd_cnt)
+	if (on_cmds->cmd_cnt) {
+		pr_err("%s: endcredits: sending on_cmds");
 		mdss_dsi_panel_cmds_send(ctrl, on_cmds, CMD_REQ_COMMIT);
-
+	}
 #ifdef CONFIG_MACH_MI
 	if (pinfo->panel_dead && pinfo->initial_esd_check.check_cmd
 		&& pinfo->initial_esd_check.check_value) {

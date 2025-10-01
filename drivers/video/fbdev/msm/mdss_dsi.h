@@ -605,6 +605,7 @@ struct mdss_dsi_ctrl_pdata {
 	struct delayed_work cmds_work;
 	struct delayed_work panel_dead_report_work;
 #endif
+	bool force_reinit_done;
 };
 
 struct dsi_status_data {

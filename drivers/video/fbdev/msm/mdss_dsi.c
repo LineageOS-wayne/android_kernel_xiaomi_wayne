@@ -37,6 +37,8 @@
 #include "mdss_dba_utils.h"
 #include "mdss_livedisplay.h"
 
+#include "hx83102e_init.h"
+
 #define CMDLINE_DSI_CTL_NUM_STRING_LEN 2
 
 /* Master structure to hold all the information about the DSI/panel */
@@ -451,7 +453,7 @@ static int mdss_dsi_panel_power_lp(struct mdss_panel_data *pdata, int enable)
 extern bool ESD_TE_status;
 #endif
 
-static int mdss_dsi_panel_power_ctrl(struct mdss_panel_data *pdata,
+int mdss_dsi_panel_power_ctrl(struct mdss_panel_data *pdata,
 	int power_state)
 {
 	int ret = 0;
@@ -3013,24 +3015,35 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 		rc = mdss_dsi_on(pdata);
 		break;
 	case MDSS_EVENT_UNBLANK:
+		pr_err("endcredits: MDSS_EVENT_UNBLANK event enter");
 		if (ctrl_pdata->on_cmds.link_state == DSI_LP_MODE)
 			rc = mdss_dsi_unblank(pdata);
 		break;
 	case MDSS_EVENT_POST_PANEL_ON:
+		pr_err("endcredits: MDSS_EVENT_POST_PANEL_ON event enter");
 		rc = mdss_dsi_post_panel_on(pdata);
 		break;
 	case MDSS_EVENT_PANEL_ON:
+		pr_err("endcredits: MDSS_EVENT_PANEL_ON event enter");
 		ctrl_pdata->ctrl_state |= CTRL_STATE_MDP_ACTIVE;
 		if (ctrl_pdata->on_cmds.link_state == DSI_HS_MODE)
 			rc = mdss_dsi_unblank(pdata);
 		pdata->panel_info.esd_rdy = true;
+		if (!ctrl_pdata->force_reinit_done) {
+			pr_err("endcredits: initializing hx83102e force reinit work");
+			msleep(1000);
+			hx83102e_force_panel_reinit_work(ctrl_pdata);
+			ctrl_pdata->force_reinit_done = true;
+		}
 		break;
 	case MDSS_EVENT_BLANK:
+		pr_err("endcredits: MDSS_EVENT_BLANK event enter");
 		power_state = (int) (unsigned long) arg;
 		if (ctrl_pdata->off_cmds.link_state == DSI_HS_MODE)
 			rc = mdss_dsi_blank(pdata, power_state);
 		break;
 	case MDSS_EVENT_PANEL_OFF:
+		pr_err("endcredits: MDSS_EVENT_PANEL_OFF event enter");
 		power_state = (int) (unsigned long) arg;
 		ctrl_pdata->ctrl_state &= ~CTRL_STATE_MDP_ACTIVE;
 		if (ctrl_pdata->off_cmds.link_state == DSI_LP_MODE)
@@ -3052,6 +3065,7 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 			MDSS_PANEL_POWER_LCD_DISABLED);
 		break;
 	case MDSS_EVENT_CONT_SPLASH_FINISH:
+		pr_err("MDSS_EVENT_CONT_SPLASH_FINISH event enter");
 		if (ctrl_pdata->off_cmds.link_state == DSI_LP_MODE)
 			rc = mdss_dsi_blank(pdata, MDSS_PANEL_POWER_OFF);
 		ctrl_pdata->ctrl_state &= ~CTRL_STATE_MDP_ACTIVE;
@@ -3077,6 +3091,7 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 		}
 		break;
 	case MDSS_EVENT_CONT_SPLASH_BEGIN:
+		pr_err("endcredits: MDSS_EVENT_CONT_SPLASH_BEGIN event enter");
 		if (ctrl_pdata->off_cmds.link_state == DSI_HS_MODE) {
 			/* Panel is Enabled in Bootloader */
 			rc = mdss_dsi_blank(pdata, MDSS_PANEL_POWER_OFF);
@@ -3112,6 +3127,7 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 			(struct mdss_intf_ulp_clamp *)arg);
 		break;
 	case MDSS_EVENT_DSI_DYNAMIC_SWITCH:
+		pr_err("endcredits: MDSS_EVENT_DSI_DYNAMIC_SWITCH event enter");
 		mode = (u32)(unsigned long) arg;
 		mdss_dsi_switch_mode(pdata, mode);
 		break;
@@ -3126,6 +3142,7 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 		rc = mdss_dsi_panel_timing_switch(ctrl_pdata, arg);
 		break;
 	case MDSS_EVENT_FB_REGISTERED:
+		pr_err("endcredits: MDSS_EVENT_FB_REGISTERED event enter");
 		mdss_dsi_debugfs_init(ctrl_pdata);
 
 		fbi = (struct fb_info *)arg;
@@ -3147,6 +3164,7 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 			pdata->panel_info.is_dba_panel) {
 				queue_delayed_work(ctrl_pdata->workq,
 					&ctrl_pdata->dba_work, HZ);
+		ctrl_pdata->force_reinit_done = false;
 		}
 		break;
 	case MDSS_EVENT_DSI_TIMING_DB_CTRL:
