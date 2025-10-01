@@ -26,15 +26,15 @@
 		qcom,mdss-dsi-panel-framerate = <60>;
 		qcom,mdss-dsi-virtual-channel-id = <0>;
 		qcom,mdss-dsi-stream = <0>;
-		qcom,mdss-dsi-panel-width = <1080>;
+		qcom,mdss-dsi-panel-width = <1200>;
 		qcom,mdss-dsi-panel-height = <1920>;
-		qcom,mdss-dsi-h-front-porch = <120>;
-		qcom,mdss-dsi-h-back-porch = <76>;
-		qcom,mdss-dsi-h-pulse-width = <16>;
+		qcom,mdss-dsi-h-front-porch = <10>;
+		qcom,mdss-dsi-h-back-porch = <10>;
+		qcom,mdss-dsi-h-pulse-width = <10>;
 		qcom,mdss-dsi-h-sync-skew = <0>;
-		qcom,mdss-dsi-v-back-porch = <6>;
-		qcom,mdss-dsi-v-front-porch = <8>;
-		qcom,mdss-dsi-v-pulse-width = <2>;
+		qcom,mdss-dsi-v-back-porch = <18>;
+		qcom,mdss-dsi-v-front-porch = <140>;
+		qcom,mdss-dsi-v-pulse-width = <4>;
 		qcom,mdss-dsi-h-left-border = <0>;
 		qcom,mdss-dsi-h-right-border = <0>;
 		qcom,mdss-dsi-v-top-border = <0>;
@@ -105,8 +105,8 @@
             05 01 10 FF 78   /* Sleep In, delay 120ms */
         ];
 	
-		/* qcom,mdss-dsi-displayoff-command = [39 01 00 00 20 00 02 28 00]; */
-		/* qcom,mdss-dsi-displayon-command = [39 01 00 00 20 00 02 29 00]; */
+		qcom,mdss-dsi-displayoff-command = [05 01 11 FF 00 05 01 28 FF 00];
+		qcom,mdss-dsi-displayon-command = [05 01 29 FF 00 05 01 10 FF 00];
 		qcom,mdss-dsi-on-command-state = "dsi_lp_mode";
 		qcom,mdss-dsi-off-command-state = "dsi_hs_mode";
 		qcom,mdss-dsi-displayoff-command-state = "dsi_hs_mode";
@@ -120,6 +120,7 @@
 		qcom,mdss-dsi-lane-1-state;
 		qcom,mdss-dsi-lane-2-state;
 		qcom,mdss-dsi-lane-3-state;
+        // qcom,mdss-dsi-panel-timings-phy-v2 = [24 1f 08 09 05 03 04 a0 24 1f 08 09 05 03 04 a0 24 1f 08 09 05 03 04 a0 24 1f 08 09 05 03 04 a0 24 1b 08 09 05 03 04 a0];
 		qcom,mdss-dsi-panel-timings = [e3 50 36 00 a9 a3 3a 50 3d 03 04 00];
 		qcom,mdss-dsi-t-clk-post = <0x20>;
 		qcom,mdss-dsi-t-clk-pre = <0x36>;
@@ -129,9 +130,9 @@
 		qcom,mdss-dsi-dma-trigger = "trigger_sw";
 		qcom,mdss-dsi-mdp-trigger = "none";
 		qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
-		qcom,mdss-dsi-reset-sequence = <1 10>, <0 1>, <1 10>;
-		qcom,mdss-pan-physical-width-dimension = <68>;
-		qcom,mdss-pan-physical-height-dimension = <121>;
+		qcom,mdss-dsi-reset-sequence = <1 1>, <0 6>, <1 10>;
+		qcom,mdss-pan-physical-width-dimension = <147>;
+		qcom,mdss-pan-physical-height-dimension = <235>;
 		qcom,mdss-dsi-te-pin-select = <1>;
 		qcom,mdss-dsi-wr-mem-start = <0x2c>;
 		qcom,mdss-dsi-wr-mem-continue = <0x3c>;
@@ -140,9 +141,10 @@
 		qcom,mdss-dsi-te-using-te-pin;
 		qcom,mdss-dsi-tx-eot-append;
 		qcom,esd-err-irq-gpio = <&tlmm 74 0x2001>;
-		qcom,mdss-panel-on-dimming-delay = <120>;
+		qcom,mdss-panel-on-dimming-delay = <0>;
+/*
 		qcom,mdss-dsi-dispparam-dimmingon-command = [
-			39 01 00 00 01 00 02 53 2C
+			15 01 02 55 01
 			];
 
 		cm,mdss-livedisplay-command-state = "dsi_lp_mode";
@@ -173,5 +175,6 @@
 		cm,mdss-livedisplay-cabc-cmd = [
 			39 01 00 00 01 00 02 55 00
 		];
+*/
 	};
 };
