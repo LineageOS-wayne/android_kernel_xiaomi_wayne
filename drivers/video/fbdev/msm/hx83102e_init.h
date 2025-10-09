@@ -50,6 +50,13 @@ static void hx83102e_panel_full_init(struct mdss_dsi_ctrl_pdata *ctrl)
 		if (delay_ms > 0) msleep(delay_ms); \
 	} while (0)
 
+	// F5 AA 55 5F
+	{
+		char data[] = {0xF5, 0xAA, 0x55, 0x5F};
+		SEND_CMD(data, sizeof(data), 5);
+		msleep(100); // sleep for board transformation
+	}
+
 	// B9 83 10 2E
 	{
 		char data[] = {0xB9, 0x83, 0x10, 0x2E};
