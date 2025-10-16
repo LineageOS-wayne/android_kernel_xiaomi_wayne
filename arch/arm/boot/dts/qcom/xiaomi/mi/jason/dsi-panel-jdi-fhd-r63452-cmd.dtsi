@@ -100,13 +100,16 @@
             05 01 29 FF 14   /* Display On, delay 20ms */
         ];
 
-        qcom,mdss-dsi-off-command = [
-            05 01 28 FF 14   /* Display Off, delay 20ms */
-            05 01 10 FF 78   /* Sleep In, delay 120ms */
-        ];
+		qcom,mdss-dsi-off-command = [
+				39 01 00 00 14 00 02 28 00
+				29 00 00 00 00 00 02 b0 00
+				29 00 00 00 00 00 02 d6 01
+				29 00 00 00 00 00 0E EC 64 D8 EC 3B 52 00 0B 0B 13 15 68 0B 95
+				29 00 00 00 00 00 02 b0 03
+				39 01 00 00 50 00 02 10 00];
 	
-		qcom,mdss-dsi-displayoff-command = [05 01 11 FF 00 05 01 28 FF 00];
-		qcom,mdss-dsi-displayon-command = [05 01 29 FF 00 05 01 10 FF 00];
+		qcom,mdss-dsi-displayoff-command = [39 01 00 00 20 00 02 28 00];
+		qcom,mdss-dsi-displayon-command = [39 01 00 00 20 00 02 29 00];
 		qcom,mdss-dsi-on-command-state = "dsi_lp_mode";
 		qcom,mdss-dsi-off-command-state = "dsi_hs_mode";
 		qcom,mdss-dsi-displayoff-command-state = "dsi_hs_mode";
