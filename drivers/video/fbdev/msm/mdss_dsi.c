@@ -37,7 +37,7 @@
 #include "mdss_dba_utils.h"
 #include "mdss_livedisplay.h"
 
-#include "hx83102e_init.h"
+#include "jd9366tp_init.h"
 
 #define CMDLINE_DSI_CTL_NUM_STRING_LEN 2
 
@@ -3030,9 +3030,9 @@ static int mdss_dsi_event_handler(struct mdss_panel_data *pdata,
 			rc = mdss_dsi_unblank(pdata);
 		pdata->panel_info.esd_rdy = true;
 		if (!ctrl_pdata->force_reinit_done) {
-			pr_err("endcredits: initializing hx83102e force reinit work");
+			pr_err("endcredits: initializing jd9366tp force reinit work");
 			msleep(1000);
-			hx83102e_force_panel_reinit_work(ctrl_pdata);
+			jd9366tp_force_panel_reinit_work(ctrl_pdata);
 			ctrl_pdata->force_reinit_done = true;
 		}
 		break;
