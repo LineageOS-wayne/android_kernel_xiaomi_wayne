@@ -293,16 +293,7 @@ int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg, int enable)
 						continue;
 				}
 			}
-			/* vddio lab ibb continus supply */
-#ifdef CONFIG_MACH_XIAOMI_LAVENDER
-			if (enable_gesture_mode || synaptics_gesture_enable_flag) {
-#elif defined(CONFIG_MACH_XIAOMI_TULIP)
-			if (enable_gesture_mode || focal_gesture_mode) {
-#elif defined(CONFIG_MACH_XIAOMI_WAYNE)
-			if(enable_gesture_mode) {
-#elif defined(CONFIG_MACH_XIAOMI_WHYRED)
-			if (enable_gesture_mode || synaptics_gesture_func_on) {
-#endif
+// disable 	enable_gesture_mode /* vddio lab ibb continus supply */
 				if( (strcmp(in_vreg[i].vreg_name,"lab")==0) ||
 						(strcmp(in_vreg[i].vreg_name,"ibb")==0) ||
 						(strcmp(in_vreg[i].vreg_name,"wqhd-vddio")==0) ) {

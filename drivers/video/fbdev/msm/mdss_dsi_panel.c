@@ -516,7 +516,7 @@ int mdss_dsi_panel_reset(struct mdss_panel_data *pdata, int enable)
 		pr_info("%s: panel reset skip\n", __func__);
 		return rc;
 	}
-
+sdfsf
 	/* For some TDDI ddic panel, LCD RST and TP RST need control Individually.
 	 * so reset TPRST pin before LCD reset
 	 * it should be according to panel's request

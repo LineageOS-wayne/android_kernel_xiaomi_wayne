@@ -375,6 +375,7 @@ static int mdss_dsi_panel_power_off(struct mdss_panel_data *pdata)
 		ret = -EINVAL;
 		goto end;
 	}
+	pr_err("%s:mdss_dsi_panel_power_off %s\n",__func__, __mdss_dsi_pm_name(DSI_PANEL_PM));
 
 	ctrl_pdata = container_of(pdata, struct mdss_dsi_ctrl_pdata,
 				panel_data);
@@ -408,6 +409,7 @@ static int mdss_dsi_panel_power_on(struct mdss_panel_data *pdata)
 		pr_err("%s: Invalid input data\n", __func__);
 		return -EINVAL;
 	}
+	pr_err("%s:mdss_dsi_panel_power_on %s\n",__func__, __mdss_dsi_pm_name(DSI_PANEL_PM));
 
 	ctrl_pdata = container_of(pdata, struct mdss_dsi_ctrl_pdata,
 				panel_data);

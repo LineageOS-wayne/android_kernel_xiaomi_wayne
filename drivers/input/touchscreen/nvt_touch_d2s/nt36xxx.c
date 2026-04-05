@@ -252,7 +252,7 @@ int nvt_gesture_switch(struct input_dev *dev, unsigned int type, unsigned int co
 		{
 		     if ((value != WAKEUP_OFF) || enable_gesture_mode)
 			{
-			delay_gesture = true;
+			//delay_gesture = true;
 			}
 		}  
 		NVT_LOG("choose the gesture mode yes or not/n");
@@ -284,7 +284,7 @@ static ssize_t double_tap_store(struct kobject *kobj,
 	if (rc)
 		return -EINVAL;
 
-	enable_gesture_mode = !!val;
+	//enable_gesture_mode = !!val;
 	return count;
 }
 
